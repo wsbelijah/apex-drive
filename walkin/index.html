@@ -46,14 +46,14 @@
 </div>
 <script>
 (function(){
-  var COUNT = 151, frames = [], cv = document.getElementById('cv'),
+  var COUNT = 125, frames = [], cv = document.getElementById('cv'),
       stage = document.getElementById('stage'), pin = document.getElementById('pin'),
       bar = document.getElementById('barFill'),
       H = document.getElementById('phaseH'), P = document.getElementById('phaseP'),
       target = 0, current = 0, drawn = -1, ready = false;
   var PHASES = [
     { until: 0.25, h: 'Walk up.',  p: 'Chalk over black, 195 miles, sitting in Los Angeles. This is the car.' },
-    { until: 0.72, h: 'Get in.',   p: 'Driver\u2019s door, red calipers, sport seats. The scroll does the walking.' },
+    { until: 0.65, h: 'Get in.',   p: 'Driver\u2019s door, red calipers, sport seats. The scroll does the walking.' },
     { until: 1.01, h: 'Your seat.', p: 'Behind the wheel — cluster lit, nav up. Where the hero lands.' }
   ];
   var phaseIdx = -1;
