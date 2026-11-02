@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APEX DRIVE — Huracán Walk-In · Street</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { background:#0a0a0b; }
+  body { font-family: "Helvetica Neue", Arial, sans-serif; color:#f5f2ea; background:#0a0a0b; }
+  .pin { height:520vh; position:relative; }
+  .stage { position:sticky; top:0; height:100vh; height:100svh; overflow:hidden; background:#000; }
+  canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
+  .shade { position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(to top, rgba(5,5,6,.72) 0%, rgba(5,5,6,0) 34%, rgba(5,5,6,0) 78%, rgba(5,5,6,.45) 100%); }
+  .bar { position:absolute; top:0; left:0; height:3px; width:100%; background:rgba(245,242,234,.14); }
+  .bar i { display:block; height:100%; width:100%; background:#e8b33c; transform-origin:0 50%; transform:scaleX(0); }
+  .brand { position:absolute; top:26px; left:30px; font-size:13px; letter-spacing:.34em; font-weight:700; }
+  .brand span { color:#e8b33c; }
+  .tag { position:absolute; top:28px; right:30px; font-size:11px; letter-spacing:.22em; opacity:.65; text-transform:uppercase; }
+  .phase { position:absolute; left:30px; bottom:88px; }
+  .phase .k { font-size:12px; letter-spacing:.3em; color:#e8b33c; text-transform:uppercase; margin-bottom:10px; }
+  .phase h1 { font-size:clamp(44px, 7.5vw, 96px); line-height:.98; font-weight:800; letter-spacing:-.01em; }
+  .phase p { margin-top:12px; font-size:15px; opacity:.75; max-width:420px; line-height:1.45; }
+  .credit { position:absolute; right:30px; bottom:30px; font-size:11px; letter-spacing:.14em; opacity:.55; text-transform:uppercase; text-align:right; line-height:1.7; }
+  .hint { position:absolute; left:30px; bottom:30px; font-size:11px; letter-spacing:.26em; opacity:.6; text-transform:uppercase; }
+  @media (max-width:640px){ .tag{ display:none } .phase{ bottom:104px } .hint{ display:none } }
+</style>
+</head>
+<body>
+<div class="pin" id="pin">
+  <div class="stage" id="stage">
+    <canvas id="cv"></canvas>
+    <div class="shade"></div>
+    <div class="bar"><i id="barFill"></i></div>
+    <div class="brand">APEX <span>DRIVE</span></div>
+    <div class="tag">Hero concept — street version</div>
+    <div class="phase">
+      <div class="k" id="phaseK">Lamborghini Huracán EVO</div>
+      <h1 id="phaseH">Walk up.</h1>
+      <p id="phaseP">Arancio Borealis over black, golden hour on an LA street. This is the car.</p>
+    </div>
+    <div class="hint">Scroll</div>
+    <div class="credit">Generated world — golden hour, Los Angeles<br>Lamborghini Huracán EVO · Arancio Borealis</div>
+  </div>
+</div>
+<script>
+(function(){
+  var COUNT = 120, frames = [], cv = document.getElementById('cv'),
+      stage = document.getElementById('stage'), pin = document.getElementById('pin'),
+      bar = document.getElementById('barFill'),
+      H = document.getElementById('phaseH'), P = document.getElementById('phaseP'),
+      target = 0, current = 0, drawn = -1, ready = false;
+  var PHASES = [
+    { until: 0.25, h: 'Walk up.',  p: 'Arancio Borealis over black, golden hour on an LA street. This is the car.' },
+    { until: 0.65, h: 'Get in.',   p: 'Driver\u2019s door swung wide, sunset through the glass. The scroll does the walking.' },
+    { until: 1.01, h: 'Your seat.', p: 'Behind the wheel — cluster lit, palms ahead. Where the hero lands.' }
+  ];
+  var phaseIdx = -1;
+  function path(i){ return 'frames/f' + ('00' + (i+1)).slice(-3) + '.webp'; }
+  function size(){
+    var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    cv.width = Math.round(stage.clientWidth * dpr);
+    cv.height = Math.round(stage.clientHeight * dpr);
+    drawn = -1;
+  }
+  function draw(){
+    var idx = Math.round(current);
+    if (idx === drawn) return;
+    var img = frames[idx];
+    if (!img || !img.complete || !img.naturalWidth) return;
+    var ctx = cv.getContext('2d'), cw = cv.width, ch = cv.height;
+    var s = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
+    var w = img.naturalWidth * s, h = img.naturalHeight * s;
+    ctx.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
+    drawn = idx;
+  }
+  function setPhase(p){
+    for (var i = 0; i < PHASES.length; i++){
+      if (p < PHASES[i].until){
+        if (phaseIdx !== i){ phaseIdx = i; H.textContent = PHASES[i].h; P.textContent = PHASES[i].p; }
+        return;
+      }
+    }
+  }
+  function loop(){
+    var d = target - current;
+    if (Math.abs(d) > 0.005){
+      current += d * 0.13;
+      if (Math.abs(target - current) <= 0.005) current = target;
+      draw();
+    }
+    requestAnimationFrame(loop);
+  }
+  function onScroll(){
+    var r = pin.getBoundingClientRect();
+    var total = r.height - window.innerHeight;
+    var p = total > 0 ? Math.min(Math.max(-r.top / total, 0), 1) : 0;
+    target = p * (COUNT - 1);
+    bar.style.transform = 'scaleX(' + p.toFixed(4) + ')';
+    setPhase(p);
+  }
+  var loaded = 0;
+  for (var i = 0; i < COUNT; i++){
+    (function(i){
+      var img = new Image();
+      img.onload = function(){ loaded++; if (i === 0){ ready = true; draw(); } };
+      img.src = path(i);
+      frames[i] = img;
+    })(i);
+  }
+  size();
+  window.addEventListener('resize', function(){ size(); draw(); });
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
