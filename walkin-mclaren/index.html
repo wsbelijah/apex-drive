@@ -25,12 +25,13 @@
   .credit { position:absolute; right:30px; bottom:30px; font-size:11px; letter-spacing:.14em; opacity:.55; text-transform:uppercase; text-align:right; line-height:1.7; }
   .hint { position:absolute; left:30px; bottom:30px; font-size:11px; letter-spacing:.26em; opacity:.6; text-transform:uppercase; }
   @media (max-width:640px){ .tag{ display:none } .phase{ bottom:104px } .hint{ display:none } }
+  #cv { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; background:#000; }
 </style>
 </head>
 <body>
 <div class="pin" id="pin">
   <div class="stage" id="stage">
-    <canvas id="cv"></canvas>
+    <video id="cv" muted playsinline preload="auto" src="walkin.mp4"></video>
     <div class="shade"></div>
     <div class="bar"><i id="barFill"></i></div>
     <div class="brand">APEX <span>DRIVE</span></div>
@@ -46,35 +47,18 @@
 </div>
 <script>
 (function(){
-  var COUNT = 117, frames = [], cv = document.getElementById('cv'),
-      stage = document.getElementById('stage'), pin = document.getElementById('pin'),
+  var vid = document.getElementById('cv'),
+      pin = document.getElementById('pin'),
       bar = document.getElementById('barFill'),
       H = document.getElementById('phaseH'), P = document.getElementById('phaseP'),
-      target = 0, current = 0, drawn = -1, ready = false;
+      target = 0, current = 0, dur = 0, primed = false;
   var PHASES = [
     { until: 0.25, h: 'Walk up.',  p: 'Black over black, 5,505 miles, sitting in San Clemente. This is the car.' },
     { until: 0.65, h: 'Get in.',   p: 'Dihedral door raised, carbon sill. The scroll does the walking.' },
-    { until: 1.01, h: 'Your seat.', p: 'Behind the wheel — folding cluster lit. Where the hero lands.' }
+    { until: 1.01, h: 'Your seat.', p: 'Behind the wheel \u2014 folding cluster lit. Where the hero lands.' }
   ];
   var phaseIdx = -1;
-  function path(i){ return 'frames/f' + ('00' + (i+1)).slice(-3) + '.webp'; }
-  function size(){
-    var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-    cv.width = Math.round(stage.clientWidth * dpr);
-    cv.height = Math.round(stage.clientHeight * dpr);
-    drawn = -1;
-  }
-  function draw(){
-    var idx = Math.round(current);
-    if (idx === drawn) return;
-    var img = frames[idx];
-    if (!img || !img.complete || !img.naturalWidth) return;
-    var ctx = cv.getContext('2d'), cw = cv.width, ch = cv.height;
-    var s = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
-    var w = img.naturalWidth * s, h = img.naturalHeight * s;
-    ctx.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
-    drawn = idx;
-  }
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function setPhase(p){
     for (var i = 0; i < PHASES.length; i++){
       if (p < PHASES[i].until){
@@ -83,35 +67,38 @@
       }
     }
   }
-  function loop(){
-    var d = target - current;
-    if (Math.abs(d) > 0.005){
-      current += d * 0.13;
-      if (Math.abs(target - current) <= 0.005) current = target;
-      draw();
-    }
-    requestAnimationFrame(loop);
-  }
   function onScroll(){
     var r = pin.getBoundingClientRect();
     var total = r.height - window.innerHeight;
     var p = total > 0 ? Math.min(Math.max(-r.top / total, 0), 1) : 0;
-    target = p * (COUNT - 1);
+    if (dur) target = p * Math.max(dur - 0.05, 0);
     bar.style.transform = 'scaleX(' + p.toFixed(4) + ')';
     setPhase(p);
   }
-  var loaded = 0;
-  for (var i = 0; i < COUNT; i++){
-    (function(i){
-      var img = new Image();
-      img.onload = function(){ loaded++; if (i === 0){ ready = true; draw(); } };
-      img.src = path(i);
-      frames[i] = img;
-    })(i);
+  function loop(){
+    if (dur && !reduced){
+      var d = target - current;
+      if (Math.abs(d) > 0.015){
+        current += d * 0.14;
+        try { vid.currentTime = current; } catch(e){}
+      }
+    }
+    requestAnimationFrame(loop);
   }
-  size();
-  window.addEventListener('resize', function(){ size(); draw(); });
+  function prime(){
+    if (primed) return; primed = true;
+    var pr = vid.play();
+    if (pr && pr.then) pr.then(function(){ vid.pause(); try { vid.currentTime = current; } catch(e){} }).catch(function(){});
+  }
+  vid.addEventListener('loadedmetadata', function(){
+    dur = vid.duration || 0;
+    if (reduced){ try { vid.currentTime = Math.max(dur - 0.05, 0); } catch(e){} }
+    onScroll();
+  });
   window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  window.addEventListener('pointerdown', prime, { once: true });
+  window.addEventListener('touchstart', prime, { once: true, passive: true });
   onScroll();
   requestAnimationFrame(loop);
 })();
