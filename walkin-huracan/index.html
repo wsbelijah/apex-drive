@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>APEX DRIVE — Huracán Walk-In · Street</title>
+<title>APEX DRIVE — Huracán Walk-In Concept</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   html { background:#0a0a0b; }
@@ -34,27 +34,27 @@
     <div class="shade"></div>
     <div class="bar"><i id="barFill"></i></div>
     <div class="brand">APEX <span>DRIVE</span></div>
-    <div class="tag">Hero concept — street version</div>
+    <div class="tag">Hero concept — scroll walk-in</div>
     <div class="phase">
-      <div class="k" id="phaseK">Lamborghini Huracán EVO</div>
+      <div class="k" id="phaseK">2022 Lamborghini Huracán EVO</div>
       <h1 id="phaseH">Walk up.</h1>
-      <p id="phaseP">Arancio Borealis over black, golden hour on an LA street. This is the car.</p>
+      <p id="phaseP">Rosso Anteros over black, 2,929 miles. This is the car.</p>
     </div>
     <div class="hint">Scroll</div>
-    <div class="credit">Generated world — golden hour, Los Angeles<br>Lamborghini Huracán EVO · Arancio Borealis</div>
+    <div class="credit">Built from the listing's real photos<br>Sienna Collection · $326,988</div>
   </div>
 </div>
 <script>
 (function(){
-  var COUNT = 120, frames = [], cv = document.getElementById('cv'),
+  var COUNT = 117, frames = [], cv = document.getElementById('cv'),
       stage = document.getElementById('stage'), pin = document.getElementById('pin'),
       bar = document.getElementById('barFill'),
       H = document.getElementById('phaseH'), P = document.getElementById('phaseP'),
       target = 0, current = 0, drawn = -1, ready = false;
   var PHASES = [
-    { until: 0.25, h: 'Walk up.',  p: 'Arancio Borealis over black, golden hour on an LA street. This is the car.' },
-    { until: 0.65, h: 'Get in.',   p: 'Driver\u2019s door swung wide, sunset through the glass. The scroll does the walking.' },
-    { until: 1.01, h: 'Your seat.', p: 'Behind the wheel — cluster lit, palms ahead. Where the hero lands.' }
+    { until: 0.25, h: 'Walk up.',  p: 'Rosso Anteros over black, 2,929 miles. This is the car.' },
+    { until: 0.65, h: 'Get in.',   p: 'Driver\u2019s door swung wide, Italian-flag belts. The scroll does the walking.' },
+    { until: 1.01, h: 'Your seat.', p: 'Behind the wheel — digital cluster lit, rear camera up. Where the hero lands.' }
   ];
   var phaseIdx = -1;
   function path(i){ return 'frames/f' + ('00' + (i+1)).slice(-3) + '.webp'; }
